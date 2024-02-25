@@ -1,7 +1,7 @@
 const password = process.env.password;
 const inquirer = require('inquirer'); //version 8.2.4
 const mysql2 = require('mysql2');
-const {findallemployees} = require('./query');
+const {allEmployees} = require('./modules/functions');
 
 //Create a connection to our sql database. Connection will be stores in variable db
 const db = mysql2.createConnection(
@@ -16,11 +16,20 @@ const db = mysql2.createConnection(
     console.log(`Connected to the cms_db database.`)
   );
 
-  inquirer
-  .prompt([
 
-  ])
+  try {
+    const [rows] = await connection.execute('SELECT name FROM DEPARTMENTS');
+    return rows.map(row => row.NAME); // Adjusted for potential case sensitivity
+} catch (err) {
+    console.error('Error fetching departments:', err);
+    return [];
+} finally {
+    await connection.end();
+}
+}
 
-  db.connection().promise().query(findallemployees())
-  const allEmployees = await db.connection().promise().query(findAllEmplyees()).
-  console.log(allEmployees);
+
+
+  db.connection().promise().query(allEmployees())
+  const allEmployees = await db.connection().promise().query(allEmployees()).
+  console.table(allEmployees);
