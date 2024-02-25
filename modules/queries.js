@@ -1,4 +1,6 @@
+const inquirer = require('inquirer'); //version 8.2.4
 const prompt = inquirer.createPromptModule();
+const { fetchDepartmentData } = require('./functions');
 
 const questionOne =
   [{
@@ -15,14 +17,14 @@ const questionOne =
       'update an employee role']
   }];
 
-  const QDepartments =
+const QDepartments =
   [{
     type: 'input',
     name: 'newDepartment',
     message: 'Please add the name of the new department, being careful to check the correct spelling.'
   }];
 
-  const QRole =
+const QRole =
 
   [{
     type: 'input',
@@ -36,16 +38,11 @@ const questionOne =
     message: 'Please add the SALARY of the new role, being careful to check the correct figure.',
   },
 
-  
   {
-    type: 'input',
-    name: 'newRoleSalary',
-    message: 'Please add the SALARY of the new role, being careful to check the correct figure.',
-  },
-
-
-
-
-
-];
+    type: 'list',
+    name: 'roleDepartment',
+    message: 'Please select the DEPARTMENT for the new role.',
+    choices: () => fetchDepartmentData()
+  }
+  ];
 
