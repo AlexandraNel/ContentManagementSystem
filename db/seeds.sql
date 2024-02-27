@@ -1,4 +1,4 @@
---department table data
+
 INSERT INTO department (name) 
 VALUES 
 ('Design'), 
@@ -10,7 +10,7 @@ VALUES
 ('Human Resources'),
 ('Finance');
 
---role table data
+
 INSERT INTO role (title, salary) 
 VALUES
 ('Graphic Designer', 70000),
@@ -27,35 +27,35 @@ VALUES
 ('Marketing Director', 95000),
 ('UI/UX Designer', 80000),,
 ('Copywriter', 70000 )
-('IT Support Specialist' 70000),
-('IT Manager' 90000),
-('Content Strategist' 70000),
-('HR Specialist' 70000),
-('HR Manager' 90000),
+('IT Support Specialist', 70000),
+('IT Manager', 90000),
+('Content Strategist', 70000),
+('HR Specialist', 70000),
+('HR Manager', 90000),
 ('Finance Analyst', 80000),
-('Finance Director' 95000);
+('Finance Director', 95000);
 
---employees table data
+
 INSERT INTO employees (first_name, last_name) 
 VALUES
-('Alex', 'Johnson'),
-('Samantha', 'Lee'),
-('Jamie', 'Smith'),
-('Chris', 'Doe'),
-('Jessica', 'Wallace'),
-('Michael', 'Brown'),
-('Emily', 'Davis'),
-('Patrick', 'Green'),
-('Olivia', 'Martinez'),
-('Ethan', 'Taylor'),
-('Sophia', 'Anderson'),
-('Isabella', 'Wilson'),
-('James', 'Thomas'),
-('Ava', 'Harris'),
-('Mason', 'Clark'),
-('Ella', 'Roberts'),
+('Alex', 'Johnson', 1),
+('Samantha', 'Lee', 3),
+('Jamie', 'Smith', 21),
+('Chris', 'Doe', 10),
+('Jessica', 'Wallace', 6),
+('Michael', 'Brown', 11),
+('Emily', 'Davis', 5),
+('Patrick', 'Green', 8),
+('Olivia', 'Martinez', 16),
+('Ethan', 'Taylor', 13),
+('Sophia', 'Anderson', 4),
+('Isabella', 'Wilson', 9),
+('James', 'Thomas', 7),
+('Ava', 'Harris', 10),
+('Mason', 'Clark', 12),
+('Ella', 'Roberts', 2),
 ('Liam', 'Rodriguez'),
-('Emma', 'Lewis'),
-('Noah', 'White'),
-('Charlotte', 'Walker'),
-('Lucas', 'King');
+('Emma', 'Lewis', 3),
+('Noah', 'White', 14),
+('Charlotte', 'Walker', 15),
+('Lucas', 'King', 20);

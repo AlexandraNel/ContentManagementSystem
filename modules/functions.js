@@ -1,5 +1,5 @@
 const inquirer = require('inquirer'); //version 8.2.4
-const mysql2 = require('mysql2');
+const mysql = require('mysql');
 
 function allEmployees() {
     return 'SELECT * FROM EMPLOYEES';
@@ -13,7 +13,7 @@ function departmentName() {
     return 'SELECT name FROM DEPARTMENTS'
 }
 
-//mysql2 async function for extracting department names from table. names on DEPARTAMENT table can be
+//mysql async function for extracting department names from table. names on DEPARTAMENT table can be
 //extended by user as an option, therefore this data can change and must be dynamically 
 //populated into the inquirer module also
 async function fetchDepartmentData() {
