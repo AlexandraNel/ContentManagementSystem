@@ -1,48 +1,91 @@
-const inquirer = require('inquirer'); //version 8.2.4
-const prompt = inquirer.createPromptModule();
-const { fetchDepartmentData } = require('./functions');
+const mysql = require('mysql2');
+const db = require('../db/connections');
 
-const questionOne =
-  [{
-    type: 'list',
-    name: 'start',
-    message: 'Welcome! What would you like to do?',
-    choices: [
-      'view all departments',
-      'view all roles',
-      'view all employees',
-      'add a department',
-      'add a role',
-      'add an employee',
-      'update an employee role']
-  }];
+// queries are within an exportable class
+class dataBase {
 
-const QDepartments =
-  [{
-    type: 'input',
-    name: 'newDepartment',
-    message: 'Please add the name of the new department, being careful to check the correct spelling.'
-  }];
+    // all departments database query returns a promise result object to be used when called with an async function
+    static async allDepartments() {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT * FROM department`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
 
-const QRole =
+    // all departments database query returns a promise result object to be used when called with an async function
+    static async allroles() {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT * FROM role`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
 
-  [{
-    type: 'input',
-    name: 'newRoleName',
-    message: 'Please add the NAME of the new role, being careful to check the correct spelling.',
-  },
+    // all employees database query returns a promise result object to be used when called with an async function
+    static async allEmployees() {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT * FROM employees`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
 
-  {
-    type: 'input',
-    name: 'newRoleSalary',
-    message: 'Please add the SALARY of the new role, being careful to check the correct figure.',
-  },
 
-  {
-    type: 'list',
-    name: 'roleDepartment',
-    message: 'Please select the DEPARTMENT for the new role.',
-    choices: () => fetchDepartmentData()
-  }
-  ];
+    //add dept database query returns a promise result object to be used when called with an async function
+    //i want user input to represent the values required in creating  anew database so will use ? parameters to prevent SQL injections
+    //I will then pass teh user input as an array of value sto correspond to these
+    static async addDepartment() {
+        return new Promise((resolve, reject) => {
+            db.query(`INSERT INTO department (name) VALUES (?)`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
 
+    static async addDepartment() {
+        return new Promise((resolve, reject) => {
+            db.query(`SELECT name FROM DEPARTMENTS`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
+};
+
+//mysql async function for extracting department names from table. names on DEPARTAMENT table can be
+//extended by user as an option, therefore this data can change and must be dynamically 
+//populated into the inquirer module also
+async function fetchDepartmentData() {
+    try {
+        const [QRoleDeptData] = await connection.execute('SELECT name FROM DEPARTMENTS');
+        const names = QRoleDeptData.map(row => row.name);
+        return names;
+
+    } catch (err) {
+        console.error('Error fetching names data:', err);
+        return [];
+    }
+};
+
+module.exports = dataBase;
+module.exports = { fetchDepartmentData };
