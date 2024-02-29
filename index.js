@@ -1,7 +1,7 @@
 const inquirer = require('inquirer'); //version 8.2.4
 const prompt = inquirer.createPromptModule();
 const { fetchDepartmentData, dataBase } = require('./modules/queries');
-const db = require ('./db/connections')
+const db = require('./db/connections')
 
 
 const questionOne =
@@ -48,14 +48,53 @@ const QRole =
   }
   ];
 
-  //questions passed into prompt. using .then allows the answers to be handled using answers parameter
-    //switch statements to handle the answers object passed in from questionOne function
-    //accessing the options of the  answers object requires the key value pair answers.start 
-prompt(questionOne).then((answers) => {
-    switch (answers.start) {
-       case 'view all departments': 
+//questions passed into prompt. using .then allows the answers to be handled using answers parameter
+//switch statements to handle the answers object passed in from questionOne function
+//accessing the options of the  answers object requires the key value pair answers.start 
+prompt(questionOne).then(async (answers) => {
+  switch (answers.start) {
+    case 'view all departments':
+      try {
+        const departments = await dataBase.allDepartments();
+        console.log(departments);
+      } catch (error) {
+        console.error("Error fecthing data", error);
+      }
 
-       
-    }
+      break;
+
+    case 'view all roles':
+      try {
+        const departments = await dataBase.allroles();
+        console.log(departments);
+      } catch (error) {
+        console.error("Error fecthing data", error);
+      }
+      break;
+
+    case 'view all employees':
+      try {
+        const departments = await dataBase.allemployees();
+        console.log(departments);
+      } catch (error) {
+        console.error("Error fecthing data", error);
+      }
+      break;
+  
+    case 'add a department':
+
+      break;
+
+    case 'add a role':
+      break;
+
+    case 'add an employee':
+      break;
       
+    case 'update an employee role':
+      break;
+
+
+  }
+
 });

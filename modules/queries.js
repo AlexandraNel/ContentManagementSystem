@@ -49,7 +49,7 @@ class dataBase {
     //I will then pass teh user input as an array of value sto correspond to these
     static async addDepartment() {
         return new Promise((resolve, reject) => {
-            db.query(`INSERT INTO department (name) VALUES (?)`, (err, result) => {
+            db.query(`INSERT INTO department (name) VALUES ([?])`, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -59,9 +59,21 @@ class dataBase {
         })
     };
 
-    static async addDepartment() {
+    //values placeholders kept within an array for update
+    static async addRole() {
         return new Promise((resolve, reject) => {
-            db.query(`SELECT name FROM DEPARTMENTS`, (err, result) => {
+            db.query(`INSERT INTO role (title, salary, department_id) VALUES ([?, ?, ?])`, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                };
+            });
+        })
+    };
+    static async addEmployee() {
+        return new Promise((resolve, reject) => {
+            db.query(`INSERT INTO employees (first_name, last_name, role_id,  manager_id ) VALUES ([?, ?, ?, ?])`, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
