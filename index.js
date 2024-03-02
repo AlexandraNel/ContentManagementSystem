@@ -49,6 +49,36 @@ const QRole =
   }
   ];
 
+// enter the employee’s first name, last name, role, and manager, and that employee is added to the database
+
+const QEmployee =
+  [{
+    type: 'input',
+    name: 'employeeFirstName',
+    message: 'Please add the FIRST NAME of the new employee, being careful to check the correct spelling.',
+  },
+  {
+    type: 'input',
+    name: 'employeeLastName',
+    message: 'Please add the LAST NAME of the new employee, being careful to check the correct spelling.',
+  },
+  {
+    type: 'list',
+    name: 'employeeRole',
+    message: 'Please select the DEPARTMENT for the new role.',
+    choices: () => fetchRoletData()
+  },
+    // first_name
+    // last_name
+    // role_id
+    // manager_id
+  }];
+
+const QEmployeeRole =
+  [{
+
+  }];
+
 //I have wrapped my inquirer Q1 prompt in an async function rather than using .then as I find it easier
 // to read and handle this way. I am using a switch statement to manage the choices object/array of questionOne
 // 
@@ -61,6 +91,7 @@ async function handleQuestionOne() {
     const answers = prompt(questionOne);
 
     switch (answers.start) {
+
       case 'view all departments':
 
         try {
@@ -72,6 +103,7 @@ async function handleQuestionOne() {
 
         break;
       //uses static async in queries.js class dataBase to retrieve roles from mysql db
+
       case 'view all roles':
 
         try {
@@ -114,26 +146,31 @@ async function handleQuestionOne() {
         //that object is then used to pass the new user input ROLE data into the queries.js class that manages the mysql commands
         try {
           const inputRole = await roleHandler();
-          const updatedRoleTable = await dataBase.addRole(inputRole.roleName, inputRole.roleSalary, inputRole.roleDept);
+          const updatedRoleTable = await dataBase.addRole(inputRole.roleName, inputRole.roleSalary, inputRole.roleDeptId);
           console.table(updatedRoleTable);
         } catch (err) {
           console.error("Error adding role", err);
         }
-    }
-    break;
+        break;
 
-      case 'add an employee':
-    break;
+        case 'add an employee':
+        //using the roleHandler to manage the mulitple inputs from the inquierer question and turn them into an object
+        //that object is then used to pass the new user input ROLE data into the queries.js class that manages the mysql commands
+        try {
+          const inputPerson = await employeeHandler();
+          const updatedEmployeeTable = await dataBase.addEmployee(inputPerson.newFirstName, inputPerson.newLastName, inputPerson.newRoleId);
+          console.table(updatedEmployeeTable);
+        } catch (err) {
+          console.error("Error adding employee", err);
+        }
+        break;
 
       case 'update an employee role':
-    break;
+        break;
 
 
-  }
-
-);
-
-}
+    }
+  }};
 
 //departmentHandler delivers the departments question for inquirer to the user
 //retrieves the user input on the newDepartment Q object
@@ -159,11 +196,26 @@ async function roleHandler() {
     const userRole = {
       roleName: addRoleQuestions.newRoleName,
       roleSalary: addRoleQuestions.newRoleSalary,
-      roleDept: addRoleQuestions.roleDepartment
+      roleDeptId: addRoleQuestions.roleDepartment
     };
     return userRole;
   } catch (err) {
     console.error("failed to process user input", err);
 
-  }
+  };
+}
+
+async function employeeHandler() {
+  try {
+    const addEmployeeQuestions = await prompt(QEmployee);
+    const newPerson = {
+      newFirstName: addEmployeeQuestions.employeeFirstName,
+      newLastName: addEmployeeQuestions.employeeLastName,
+      newRoleId: addEmployeeQuestions.employeeRole
+    };
+    return newPerson;
+
+  } catch (err) {
+    console.error("failed to process user input", err);
+   };
 };
