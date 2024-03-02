@@ -150,7 +150,7 @@ async function handleQuestionOne() {
           console.error("Error fecthing data", error);
         }
         break;
-        
+
 
       case 'add a department':
 
@@ -200,7 +200,7 @@ async function handleQuestionOne() {
           const updatedEmployee = await Database.updateEmployeeRole(personRole.employee, personRole.updatedRole)
           console.table(updatedEmployee);
         } catch (err) {
-          console.error{ "Error updating employee role", err };
+          console.error("Error updating employee role", err);
         }
 
         break;
