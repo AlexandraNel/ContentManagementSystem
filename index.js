@@ -1,7 +1,6 @@
 const inquirer = require('inquirer'); //version 8.2.4
 const prompt = inquirer.createPromptModule();
-const { fetchDepartmentData, dataBase } = require('./modules/queries');
-const db = require('./db/connections')
+const { Database, ListFunctions } = require('./modules/queries');
 
 
 const questionOne =
@@ -45,7 +44,7 @@ const QRole =
     type: 'list',
     name: 'roleDepartment',
     message: 'Please select the DEPARTMENT for the new role.',
-    choices: () => fetchDepartmentData()
+    choices: () => ListFunctions.fetchDepartmentData()
   }
   ];
 
@@ -66,73 +65,100 @@ const QEmployee =
     type: 'list',
     name: 'employeeRole',
     message: 'Please select the DEPARTMENT for the new role.',
-    choices: () => fetchRoletData()
+    //choices are managed by ListFunction Class in queries.js where we pull potentially updated mysql table data 
+    // and present them as the choices in the inquirer list 
+    choices: () => ListFunctions.fetchRoletData()
   },
-    // first_name
-    // last_name
-    // role_id
-    // manager_id
+  {
+    type: 'list',
+    name: 'manager',
+    message: 'Please select the MANAGER for this employee.',
+    //choices are managed by ListFunction Class in queries.js where we pull potentially updated mysql table data 
+    // and present them as the choices in the inquirer list. 
+    //I am using a spread operator and an async function here to gather the list options from mysql and add in a NONE option if there is no manager
+    choices: async () => {
+      const employeeList = ListFunctions.fetchEmployeeData
+        ()
+      return [...employeeList, { name: 'None', value: null }];
+    }
   }];
 
 const QEmployeeRole =
   [{
+    type: 'list',
+    name: 'chooseEmployee',
+    message: 'Please select the EMPLOYEE whose role requires updating.',
+    choices: () => ListFunctions.fetchEmployeeData
+      ()
+  },
+  {
+    type: 'list',
+    name: 'chooseRole',
+    message: 'Please select the NEW ROLE for this Employee.',
+    choices: () => ListFunctions.fetchRoleData()
+  },
+  ];
 
-  }];
 
 //I have wrapped my inquirer Q1 prompt in an async function rather than using .then as I find it easier
 // to read and handle this way. I am using a switch statement to manage the choices object/array of questionOne
+// QuestionOne leads to all other questions on a case by case basis (through the switch/case)
 // 
-// I utilise my database class that I have imported for from queries.js for mysql db interaction/calls
-//accessing the options of the  answers object requires the key value pair ie. answers.start
+//Simple questions query the database utilising the class Database functions imported from queries.js
+//Complex multi-factor questions are managed with handler functions, (below the switch/case) and ListFunctions imported
+//from the queries database 
 async function handleQuestionOne() {
 
   try {
 
     const answers = prompt(questionOne);
-
+    //answers object is passed through the switch
     switch (answers.start) {
-
+      //simple query uses Database class functions from queries.js
+      //returns a table of data
       case 'view all departments':
 
         try {
-          const departments = await dataBase.allDepartments();
+          const departments = await Database.allDepartments();
           console.table(departments);
         } catch (error) {
           console.error("Error fecthing data", error);
         }
 
         break;
-      //uses static async in queries.js class dataBase to retrieve roles from mysql db
+
 
       case 'view all roles':
-
+        //simple query uses Database class functions from queries.js
+        //returns a table of data
         try {
-          const roles = await dataBase.allroles();
+          const roles = await Database.allroles();
           console.table(roles);
         } catch (error) {
           console.error("Error fecthing data", error);
         }
         break;
 
-      //uses static async in queries.js class dataBase to retirve roles from mysql db
-      case 'view all employees':
 
+      case 'view all employees':
+        //simple query uses Database class functions from queries.js
+        //returns a table of data
         try {
-          const employees = await dataBase.allemployees();
+          const employees = await Database.allemployees();
           console.table(employees);
         } catch (error) {
           console.error("Error fecthing data", error);
         }
         break;
+        
 
-      //becomes more complex with this option, my try block now delivers the user to other related functions which allow
-      // the use of further inquirer prompt modules using async/await sytanx. This then allows database updates utilising the
-      //queries.js dataBase class, and returns relative updated tables. 
       case 'add a department':
 
+        //Complex option, utilises handlerFunctions (below switch/case) to manage multiple answers
+        // these objects can then be delievered to the DataBase class functions for use in querying the database
         try {
           const inputDept = await departmentHandler();
-          const updatedDeptTable = await dataBase.addDepartment(inputDept);
+          const updatedDeptTable = await Database.addDepartment(inputDept);
           console.table(updatedDeptTable)
         }
         catch (err) {
@@ -142,39 +168,52 @@ async function handleQuestionOne() {
 
 
       case 'add a role':
-        //using the roleHandler to manage the mulitple inputs from the inquierer question and turn them into an object
-        //that object is then used to pass the new user input ROLE data into the queries.js class that manages the mysql commands
+
+        //Complex option, utilises handlerFunctions (below switch/case) to manage multiple answers
+        // these objects can then be delievered to the DataBase class functions for use in querying the database
         try {
           const inputRole = await roleHandler();
-          const updatedRoleTable = await dataBase.addRole(inputRole.roleName, inputRole.roleSalary, inputRole.roleDeptId);
+          const updatedRoleTable = await Database.addRole(inputRole.roleName, inputRole.roleSalary, inputRole.roleDeptId);
           console.table(updatedRoleTable);
         } catch (err) {
           console.error("Error adding role", err);
         }
         break;
 
-        case 'add an employee':
-        //using the roleHandler to manage the mulitple inputs from the inquierer question and turn them into an object
-        //that object is then used to pass the new user input ROLE data into the queries.js class that manages the mysql commands
+      case 'add an employee':
+
+        //Complex option, utilises handlerFunctions (below switch/case) to manage multiple answers
+        // these objects can then be delievered to the DataBase class functions for use in querying the database
         try {
           const inputPerson = await employeeHandler();
-          const updatedEmployeeTable = await dataBase.addEmployee(inputPerson.newFirstName, inputPerson.newLastName, inputPerson.newRoleId);
+          const updatedEmployeeTable = await Database.addEmployee(inputPerson.newFirstName, inputPerson.newLastName, inputPerson.newId);
           console.table(updatedEmployeeTable);
         } catch (err) {
           console.error("Error adding employee", err);
         }
         break;
 
+
       case 'update an employee role':
+        try {
+          const personRole = await updateRoleHandler();
+          const updatedEmployee = await Database.updateEmployeeRole(personRole.employee, personRole.updatedRole)
+          console.table(updatedEmployee);
+        } catch (err) {
+          console.error{ "Error updating employee role", err };
+        }
+
         break;
-
-
     }
-  }};
+  } catch (err) {
+    console.error("major issue handleQuestionOne function", err)
+  }
+};
 
 //departmentHandler delivers the departments question for inquirer to the user
 //retrieves the user input on the newDepartment Q object
-//returns the user input for use
+//returns the user input as an object for use.
+//this function is created to manage multiple user input answers that need ot be passed to to the database
 async function departmentHandler() {
 
   try {
@@ -188,7 +227,7 @@ async function departmentHandler() {
 
 //this function will take each answer from the QRole inquirer module and pass them into an obeject
 //I decided to use an object with key/value pairs rather than an array for useability of the data
-//this way teh order of teh returned data is not essential
+//this way the order of the returned data is not essential
 async function roleHandler() {
 
   try {
@@ -211,11 +250,26 @@ async function employeeHandler() {
     const newPerson = {
       newFirstName: addEmployeeQuestions.employeeFirstName,
       newLastName: addEmployeeQuestions.employeeLastName,
-      newRoleId: addEmployeeQuestions.employeeRole
+      newId: addEmployeeQuestions.employeeRole
     };
     return newPerson;
 
   } catch (err) {
     console.error("failed to process user input", err);
-   };
+  };
+};
+
+async function updateRoleHandler() {
+  try {
+    const updateRole = await prompt(QEmployeeRole);
+    const newRoleData = {
+      employee: updateRole.chooseEmployee,
+      updatedRole: updateRole.chooseRole
+    }
+    return newRoleData;
+  } catch (err) {
+    console.error("failed to process user input", err)
+  }
+
+
 };
