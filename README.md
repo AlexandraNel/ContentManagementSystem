@@ -79,6 +79,7 @@ Alexandra Nel info@alexandranel.com
 ## Credits
 
 [Alexandra Nel] (https://github.com/AlexandraNel/)
+Assistance from MONASH BOOTCAMP lecturers, TA's, Tutors, and chatGPT tutoring 
 
 ## License
         
