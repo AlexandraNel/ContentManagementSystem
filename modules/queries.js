@@ -1,5 +1,5 @@
 const mysql = require('mysql2');
-const db = require('../db/connections');
+const { db } = require('../db/connections');
 
 // queries are within an exportable class
 class Database {
@@ -82,9 +82,9 @@ class Database {
     };
 
 
-    static async addEmployee(newFirstName, newLastName, newId) {
+    static async addEmployee(newFirstName, newLastName, newId, managerId) {
         return new Promise((resolve, reject) => {
-            db.query(`INSERT INTO employees (first_name, last_name, role_id,  manager_id ) VALUES (?, ?, ?, ?)`, [newFirstName, newLastName, newId], (err, result) => {
+            db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id ) VALUES (?, ?, ?, ?)`, [newFirstName, newLastName, newId, managerId], (err, result) => {
                 if (err) {
                     reject(new Error("error inserting new employee into db" + err)); //new error allows me to customise the error note for 'reject' syntax
                 } else {
@@ -98,9 +98,9 @@ class Database {
 
     static async updateEmployeeRole(personID, roleID) {
         return new Promise((resolve, reject) => {
-            db.query(`UPDATE employees SET role_id = (?) WHERE id = (?)`, [roleID, personID], (err, result) => {
+            db.query(`UPDATE employees SET role_id = ? WHERE id = ?`, [roleID, personID], (err, result) => {
                 if (err) {
-                    reject(new Error("error inserting new employee into db" + err)); //new error allows me to customise the error note for 'reject' syntax
+                    reject(new Error("error updating employee role in db" + err)); //new error allows me to customise the error note for 'reject' syntax
                 } else {
                     this.allEmployees().then(resolve).catch(err => {
                         reject(new Error("error retrieving updated role db" + err)); //customised error on reject here to track where code can break
@@ -117,7 +117,7 @@ class ListFunctions {
     //populated into the inquirer module also. We must also have the dept ID in order to use this to update ROLES table
     static async fetchDepartmentData() {
         try {
-            const [departments] = await connection.execute('SELECT id, name FROM DEPARTMENT');
+            const [departments] = await db.promise().query('SELECT name, id FROM DEPARTMENT');
             const deptChoices = departments.map(dept => ({
                 name: dept.name, //what the user sees
                 value: dept.id //what the value of the choice returns
@@ -132,7 +132,7 @@ class ListFunctions {
 
     static async fetchRoleData() {
         try {
-            const [roles] = await connection.execute('SELECT id, title FROM ROLE');
+            const [roles] = await db.promise().query('SELECT id, title FROM ROLE');
             const roleChoices = roles.map(role => ({
                 name: role.title, //what the user sees
                 value: role.id // the value returned from the choice
@@ -148,12 +148,13 @@ class ListFunctions {
     //this is used for the list option of assigning a manager to a new employee as well as updating an employee role
     static async fetchEmployeeData() {
         try {
-            const [employees] = await connection.execute('SELECT id, first_name, last_name FROM EMPLOYEES');
+            const [employees] = await db.promise().query('SELECT id, first_name, last_name FROM EMPLOYEES');
             const allEmployees = employees.map(person => ({
                 name: `${person.first_name} ${person.last_name}`,  //what the user sees
                 value: person.id // the value returned from the choice
             }));
 
+            allEmployees.push({ name: 'None', value: null });
             return allEmployees;
 
         } catch (err) {

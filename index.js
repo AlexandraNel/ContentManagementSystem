@@ -3,6 +3,7 @@ const prompt = inquirer.createPromptModule();
 const { Database, ListFunctions } = require('./modules/queries');
 
 
+
 const questionOne =
   [{
     type: 'list',
@@ -15,7 +16,8 @@ const questionOne =
       'add a department',
       'add a role',
       'add an employee',
-      'update an employee role']
+      'update an employee role',
+      'Exit']
   }];
 
 const QDepartments =
@@ -67,7 +69,7 @@ const QEmployee =
     message: 'Please select the DEPARTMENT for the new role.',
     //choices are managed by ListFunction Class in queries.js where we pull potentially updated mysql table data 
     // and present them as the choices in the inquirer list 
-    choices: () => ListFunctions.fetchRoletData()
+    choices: () => ListFunctions.fetchRoleData()
   },
   {
     type: 'list',
@@ -76,11 +78,8 @@ const QEmployee =
     //choices are managed by ListFunction Class in queries.js where we pull potentially updated mysql table data 
     // and present them as the choices in the inquirer list. 
     //I am using a spread operator and an async function here to gather the list options from mysql and add in a NONE option if there is no manager
-    choices: async () => {
-      const employeeList = ListFunctions.fetchEmployeeData
-        ()
-      return [...employeeList, { name: 'None', value: null }];
-    }
+    choices: () => ListFunctions.fetchEmployeeData()
+
   }];
 
 const QEmployeeRole =
@@ -88,8 +87,7 @@ const QEmployeeRole =
     type: 'list',
     name: 'chooseEmployee',
     message: 'Please select the EMPLOYEE whose role requires updating.',
-    choices: () => ListFunctions.fetchEmployeeData
-      ()
+    choices: () => ListFunctions.fetchEmployeeData()
   },
   {
     type: 'list',
@@ -111,7 +109,7 @@ async function handleQuestionOne() {
 
   try {
 
-    const answers = prompt(questionOne);
+    const answers = await prompt(questionOne);
     //answers object is passed through the switch
     switch (answers.start) {
       //simple query uses Database class functions from queries.js
@@ -144,7 +142,7 @@ async function handleQuestionOne() {
         //simple query uses Database class functions from queries.js
         //returns a table of data
         try {
-          const employees = await Database.allemployees();
+          const employees = await Database.allEmployees();
           console.table(employees);
         } catch (error) {
           console.error("Error fecthing data", error);
@@ -186,7 +184,7 @@ async function handleQuestionOne() {
         // these objects can then be delievered to the DataBase class functions for use in querying the database
         try {
           const inputPerson = await employeeHandler();
-          const updatedEmployeeTable = await Database.addEmployee(inputPerson.newFirstName, inputPerson.newLastName, inputPerson.newId);
+          const updatedEmployeeTable = await Database.addEmployee(inputPerson.newFirstName, inputPerson.newLastName, inputPerson.newId, inputPerson.managerId);
           console.table(updatedEmployeeTable);
         } catch (err) {
           console.error("Error adding employee", err);
@@ -204,7 +202,20 @@ async function handleQuestionOne() {
         }
 
         break;
+
+      case 'Exit':
+
+        console.log("exit successful")
+        process.exit(0); //exit process
+
+        break;
     }
+
+    //Recursive call here, outside the switch statement, 
+    // to ensure it's executed after the switch block has completed
+    // but not when 'Exit' is chosen (handled by the return statement above).
+    await handleQuestionOne();
+
   } catch (err) {
     console.error("major issue handleQuestionOne function", err)
   }
@@ -250,7 +261,8 @@ async function employeeHandler() {
     const newPerson = {
       newFirstName: addEmployeeQuestions.employeeFirstName,
       newLastName: addEmployeeQuestions.employeeLastName,
-      newId: addEmployeeQuestions.employeeRole
+      newId: addEmployeeQuestions.employeeRole,
+      managerId: addEmployeeQuestions.manager
     };
     return newPerson;
 
@@ -273,3 +285,8 @@ async function updateRoleHandler() {
 
 
 };
+
+//index.js is initialised
+handleQuestionOne();
+
+
